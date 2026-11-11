@@ -1,0 +1,24 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Configuração local (cada máquina cria o seu a partir de .env.example)
+.env
+
+# Build do executável Windows (o .exe pronto fica na raiz)
+build/
+
+# Arquivos que não devem ir para o repositório
+fora_do_git/
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Backups locais do banco
+backup.sql

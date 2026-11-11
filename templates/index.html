@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Busca de Imagens · PLN</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Projeto de Processamento de Linguagem Natural</p>
+      <h1>Busca de Imagens de Sensoriamento Remoto</h1>
+      <p class="subtitle">
+        Pergunte em português. O sistema compara sua frase com perguntas de
+        referência usando <strong>Bag of Words</strong> e
+        <strong>similaridade de cosseno</strong>.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <form id="form" class="busca">
+      <input
+        id="pergunta"
+        type="text"
+        placeholder="Ex.: quantas imagens de vegetação existem?"
+        autocomplete="off"
+        maxlength="300"
+        aria-label="Pergunta"
+      >
+      <button type="submit">Buscar</button>
+    </form>
+
+    <div class="exemplos" aria-label="Exemplos de perguntas">
+      {% for exemplo in exemplos %}
+      <button type="button" class="chip" data-pergunta="{{ exemplo }}">{{ exemplo }}</button>
+      {% endfor %}
+    </div>
+
+    <section id="resposta" class="resposta" aria-live="polite">
+      <p id="mensagem" class="mensagem">
+        Digite uma pergunta ou clique em um exemplo.
+      </p>
+      <span id="confianca" class="confianca escondido"></span>
+    </section>
+
+    <details id="painel-debug" class="painel-debug">
+      <summary>Mostrar como o sistema pensou</summary>
+      <div id="debug-conteudo" class="debug-conteudo">
+        <p class="dica">Faça uma busca para ver o pipeline de PLN passo a passo.</p>
+      </div>
+    </details>
+
+    <section id="resultados" class="resultados"></section>
+  </main>
+
+  <footer>
+    <p>
+      Pipeline: normalização → tokenização → stopwords → stemming (RSLP) →
+      TF-IDF/BOW → cosseno → SQL.
+    </p>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
