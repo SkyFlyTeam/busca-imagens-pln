@@ -19,16 +19,19 @@ EXTRA = {
     "recentes", "ultima", "ultimas", "novo", "novos", "nova", "novas",
     "categoria", "origem", "origens", "fonte", "fontes", "sensor",
     "sensores", "dia", "ano", "data", "drone", "drono", "satelite",
+    # palavras parecidas com nomes de meses que NÃO devem virar mês
+    # (ex.: "maior" seria corrigido para "maio")
+    "maior", "menor",
 }
 
 
 def _construir_lexico() -> list[str]:
     # import local para evitar ciclo de importação
-    from entidades import SINONIMOS_CATEGORIA, SINONIMOS_ORIGEM
+    from entidades import MESES, SINONIMOS_CATEGORIA, SINONIMOS_ORIGEM
     from intencoes import INTENCOES
     from lexico import SINONIMOS_INTENCAO
 
-    palavras = set(EXTRA)
+    palavras = set(EXTRA) | set(MESES) | {"mes", "meses"}
 
     for sinonimos in SINONIMOS_INTENCAO.values():
         for sinonimo in sinonimos:
@@ -49,6 +52,15 @@ def _construir_lexico() -> list[str]:
 
 LEXICO = _construir_lexico()
 
+# Erros de digitação "pelo som": a primeira letra muda, mas a palavra soa
+# igual. Sem isso, "kuantas" nunca seria comparada com "quantas".
+INICIAIS_EQUIVALENTES = {
+    "k": {"q", "c"}, "q": {"k", "c"}, "c": {"k", "q", "s"},
+    "s": {"c", "z"}, "z": {"s"},
+    "j": {"g"}, "g": {"j"},
+    "x": {"c"},
+}
+
 
 def corrigir_token(token: str) -> str:
     if not token or token in LEXICO or token.isdigit() or "/" in token:
@@ -58,10 +70,12 @@ def corrigir_token(token: str) -> str:
     if len(token) < 4:
         return token
 
-    # candidatos com a mesma letra inicial e tamanho parecido
+    # candidatos com a mesma letra inicial (ou uma troca fonética comum,
+    # ex.: "kuantas" -> "quantas") e tamanho parecido
+    iniciais = {token[0]} | INICIAIS_EQUIVALENTES.get(token[0], set())
     candidatos = [
         p for p in LEXICO
-        if p and p[0] == token[0] and abs(len(p) - len(token)) <= 3
+        if p and p[0] in iniciais and abs(len(p) - len(token)) <= 3
     ]
     if not candidatos:
         return token

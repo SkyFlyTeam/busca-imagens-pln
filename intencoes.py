@@ -6,6 +6,13 @@ Cada intenção tem:
   - sql: consulta parametrizada
   - tipo: "contagem" | "lista" | "origens"
   - parametros: nomes das entidades extraídas que entram na SQL, na ordem
+
+Intenções com filtros opcionais (ex.: "mais recentes" + "de vegetação")
+não têm "sql" pronta. Elas têm:
+  - opcionais: entidades que, se aparecerem na pergunta, viram filtro extra
+  - sql_select: início da consulta (SELECT ... FROM ...)
+  - sql_final: o que vem depois do WHERE (ORDER BY, GROUP BY, LIMIT)
+O motor monta o WHERE com os parâmetros obrigatórios + opcionais presentes.
 """
 
 _COLUNAS = "id, categoria, data_imagem, origem, caminho_arquivo"
@@ -91,13 +98,11 @@ INTENCOES = [
             "fotos de 2020",
             "imagens do acervo de 2024",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "WHERE EXTRACT(YEAR FROM data_imagem) = %s "
-            "ORDER BY data_imagem DESC LIMIT 60;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 60",
         "tipo": "lista",
         "parametros": ["ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "listar_data",
@@ -110,12 +115,60 @@ INTENCOES = [
             "fotos do dia 30/12/2020",
             "imagens do dia 10/10/2023",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "WHERE data_imagem = %s ORDER BY data_imagem DESC LIMIT 60;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 60",
         "tipo": "lista",
         "parametros": ["data"],
+        "opcionais": ["categoria", "origem"],
+    },
+    {
+        "id": "contar_data",
+        "parafrases": [
+            "quantas imagens de 12/03/2024",
+            "quantas fotos foram tiradas em 05/01/2023",
+            "qual o total de imagens do dia 20/11/2022",
+            "me diga quantas imagens sao de 01/06/2025",
+            "quantas imagens foram capturadas em 15/08/2021",
+            "quantas fotos do dia 30/12/2020 existem",
+        ],
+        "sql_select": "SELECT count(*) FROM metadata_table",
+        "sql_final": "",
+        "tipo": "contagem",
+        "parametros": ["data"],
+        "opcionais": ["categoria", "origem"],
+    },
+    {
+        "id": "listar_mes",
+        "parafrases": [
+            "imagens de marco",
+            "fotos de janeiro",
+            "quais imagens foram tiradas em julho",
+            "mostre as imagens do mes de outubro",
+            "imagens capturadas em dezembro",
+            "fotos do mes de maio",
+            "imagens de agua de setembro",
+        ],
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 60",
+        "tipo": "lista",
+        "parametros": ["mes"],
+        "opcionais": ["categoria", "origem", "ano"],
+    },
+    {
+        "id": "contar_mes",
+        "parafrases": [
+            "quantas imagens de marco",
+            "quantas fotos foram tiradas em janeiro",
+            "qual o total de imagens do mes de julho",
+            "me diga quantas imagens sao de outubro",
+            "quantas imagens foram capturadas em dezembro",
+            "quantas fotos do mes de maio existem",
+        ],
+        "sql_select": "SELECT count(*) FROM metadata_table",
+        "sql_final": "",
+        "tipo": "contagem",
+        "parametros": ["mes"],
+        "opcionais": ["categoria", "origem", "ano"],
     },
     {
         "id": "listar_categoria_origem",
@@ -147,13 +200,11 @@ INTENCOES = [
             "fotos de solo exposto de 2020",
             "imagens de vegetacao tiradas em 2023",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "WHERE categoria = %s AND EXTRACT(YEAR FROM data_imagem) = %s "
-            "ORDER BY data_imagem DESC LIMIT 60;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 60",
         "tipo": "lista",
         "parametros": ["categoria", "ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "listar_origem_ano",
@@ -166,13 +217,11 @@ INTENCOES = [
             "fotos de satelite de 2020",
             "imagens de drone tiradas em 2023",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "WHERE origem = %s AND EXTRACT(YEAR FROM data_imagem) = %s "
-            "ORDER BY data_imagem DESC LIMIT 60;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 60",
         "tipo": "lista",
         "parametros": ["origem", "ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "listar_categoria_origem_ano",
@@ -185,14 +234,11 @@ INTENCOES = [
             "fotos de solo exposto de satelite de 2020",
             "imagens de vegetacao por satelite em 2022",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "WHERE categoria = %s AND origem = %s "
-            "AND EXTRACT(YEAR FROM data_imagem) = %s "
-            "ORDER BY data_imagem DESC LIMIT 60;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 60",
         "tipo": "lista",
         "parametros": ["categoria", "origem", "ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "contar_categoria",
@@ -233,12 +279,11 @@ INTENCOES = [
             "quantas fotos de 2025 o sistema possui",
             "quantas imagens de 2020 foram cadastradas",
         ],
-        "sql": (
-            "SELECT count(*) FROM metadata_table "
-            "WHERE EXTRACT(YEAR FROM data_imagem) = %s;"
-        ),
+        "sql_select": "SELECT count(*) FROM metadata_table",
+        "sql_final": "",
         "tipo": "contagem",
         "parametros": ["ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "contar_categoria_origem",
@@ -267,12 +312,11 @@ INTENCOES = [
             "quantas fotos de drone de 2025 o sistema possui",
             "quantas imagens de satelite de 2020 foram cadastradas",
         ],
-        "sql": (
-            "SELECT count(*) FROM metadata_table "
-            "WHERE origem = %s AND EXTRACT(YEAR FROM data_imagem) = %s;"
-        ),
+        "sql_select": "SELECT count(*) FROM metadata_table",
+        "sql_final": "",
         "tipo": "contagem",
         "parametros": ["origem", "ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "contar_categoria_ano",
@@ -284,12 +328,11 @@ INTENCOES = [
             "quantas fotos de agua de 2025 o sistema possui",
             "quantas imagens de solo exposto de 2020 foram cadastradas",
         ],
-        "sql": (
-            "SELECT count(*) FROM metadata_table "
-            "WHERE categoria = %s AND EXTRACT(YEAR FROM data_imagem) = %s;"
-        ),
+        "sql_select": "SELECT count(*) FROM metadata_table",
+        "sql_final": "",
         "tipo": "contagem",
         "parametros": ["categoria", "ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "contar_categoria_origem_ano",
@@ -301,13 +344,11 @@ INTENCOES = [
             "quantas fotos de agua por drone de 2025 o sistema possui",
             "quantas imagens de solo exposto de satelite de 2020 foram cadastradas",
         ],
-        "sql": (
-            "SELECT count(*) FROM metadata_table "
-            "WHERE categoria = %s AND origem = %s "
-            "AND EXTRACT(YEAR FROM data_imagem) = %s;"
-        ),
+        "sql_select": "SELECT count(*) FROM metadata_table",
+        "sql_final": "",
         "tipo": "contagem",
         "parametros": ["categoria", "origem", "ano"],
+        "opcionais": ["mes"],
     },
     {
         "id": "origens_disponiveis",
@@ -320,9 +361,60 @@ INTENCOES = [
             "que origens estao catalogadas",
             "quais sensores foram usados",
         ],
-        "sql": "SELECT DISTINCT origem FROM metadata_table ORDER BY origem;",
+        "sql_select": "SELECT DISTINCT origem FROM metadata_table",
+        "sql_final": "ORDER BY origem",
         "tipo": "origens",
         "parametros": [],
+        "opcionais": ["categoria", "ano", "mes"],
+    },
+    {
+        "id": "categorias_disponiveis",
+        "parafrases": [
+            "quais categorias existem",
+            "quais sao as categorias das imagens",
+            "quais tipos de imagem existem",
+            "liste as categorias disponiveis",
+            "que categorias estao catalogadas",
+            "quais os tipos de imagem do sistema",
+            "que tipos de imagem o banco possui",
+        ],
+        "sql_select": "SELECT DISTINCT categoria FROM metadata_table",
+        "sql_final": "ORDER BY categoria",
+        "tipo": "categorias",
+        "parametros": [],
+        "opcionais": ["origem", "ano", "mes"],
+    },
+    {
+        "id": "contar_por_categoria",
+        "parafrases": [
+            "quantas imagens de cada categoria",
+            "quantas imagens por categoria",
+            "total de imagens por categoria",
+            "numero de imagens de cada tipo",
+            "quantas fotos de cada tipo de imagem",
+            "quantas imagens tem cada categoria",
+        ],
+        "sql_select": "SELECT categoria, count(*) FROM metadata_table",
+        "sql_final": "GROUP BY categoria ORDER BY categoria",
+        "tipo": "agrupado",
+        "parametros": [],
+        "opcionais": ["origem", "ano", "mes"],
+    },
+    {
+        "id": "contar_por_origem",
+        "parafrases": [
+            "quantas imagens de cada origem",
+            "quantas imagens por origem",
+            "total de imagens por fonte",
+            "numero de imagens por sensor",
+            "quantas fotos de cada fonte",
+            "quantas imagens tem cada origem",
+        ],
+        "sql_select": "SELECT origem, count(*) FROM metadata_table",
+        "sql_final": "GROUP BY origem ORDER BY origem",
+        "tipo": "agrupado",
+        "parametros": [],
+        "opcionais": ["categoria", "ano", "mes"],
     },
     {
         "id": "mais_recentes",
@@ -335,12 +427,11 @@ INTENCOES = [
             "me mostre as imagens recentes",
             "quais imagens foram tiradas por ultimo",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "ORDER BY data_imagem DESC LIMIT 6;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem DESC LIMIT 6",
         "tipo": "lista",
         "parametros": [],
+        "opcionais": ["categoria", "origem", "ano", "mes"],
     },
     {
         "id": "mais_antigas",
@@ -353,12 +444,11 @@ INTENCOES = [
             "me mostre as imagens antigas",
             "quais imagens foram tiradas primeiro",
         ],
-        "sql": (
-            f"SELECT {_COLUNAS} FROM metadata_table "
-            "ORDER BY data_imagem ASC LIMIT 6;"
-        ),
+        "sql_select": f"SELECT {_COLUNAS} FROM metadata_table",
+        "sql_final": "ORDER BY data_imagem ASC LIMIT 6",
         "tipo": "lista",
         "parametros": [],
+        "opcionais": ["categoria", "origem", "ano", "mes"],
     },
 ]
 

@@ -150,6 +150,39 @@ CASOS = [
     ("quantas fotos de drono existem", "contar_origem", "typo"),
     ("mostre as imagems mais recentes", "mais_recentes", "typo"),
     ("quais imagens de mata por sateliti em 2023", "listar_categoria_origem_ano", "typo"),
+    # contar_data
+    ("quantas imagens de 12/03/2024", "contar_data", "normal"),
+    ("quantas fotos tem do dia 05/05/2022", "contar_data", "normal"),
+    ("numero de imagens de 01/01/2021", "contar_data", "normal"),
+    # categorias_disponiveis
+    ("quais categorias existem", "categorias_disponiveis", "normal"),
+    ("quais os tipos de imagem", "categorias_disponiveis", "normal"),
+    ("me diga as categorias do acervo", "categorias_disponiveis", "normal"),
+    # contar_por_categoria / contar_por_origem
+    ("quantas imagens de cada categoria", "contar_por_categoria", "normal"),
+    ("quantas fotos tem por categoria", "contar_por_categoria", "normal"),
+    ("quantas imagens por origem", "contar_por_origem", "normal"),
+    ("quantas fotos de cada fonte", "contar_por_origem", "normal"),
+    # filtros opcionais em mais_recentes / mais_antigas / origens
+    ("quais as imagens de vegetacao mais recentes", "mais_recentes", "normal"),
+    ("qual a imagem de drone mais recente", "mais_recentes", "normal"),
+    ("qual a imagem mais antiga de agua", "mais_antigas", "normal"),
+    ("quais origens tem imagens de agua", "origens_disponiveis", "normal"),
+    # palavras que contêm sinônimos por acaso ("mar" em "marco")
+    ("imagens de marco de 2024", "listar_mes", "normal"),  # filtra mês + ano
+    ("quais imagens do usuario", "listar_todas", "normal"),
+    # mês (sozinho, com ano e com outros filtros)
+    ("imagens de julho", "listar_mes", "normal"),
+    ("fotos tiradas em fevereiro", "listar_mes", "normal"),
+    ("quantas imagens de agosto", "contar_mes", "normal"),
+    ("quantas fotos tem de abril", "contar_mes", "normal"),
+    ("imagens de vegetacao de outubro de 2025", "listar_categoria_ano", "normal"),
+    ("quantas imagens de drone em maio de 2023", "contar_mes", "normal"),  # mês + origem + ano
+    ("qual a imagem mais recente de junho", "mais_recentes", "normal"),
+    ("quantas fotos de novenbro", "contar_mes", "typo"),
+    # erro de digitação fonético
+    ("kuantas imajens tem", "contar_total", "typo"),
+    ("kuantas fotos de agua", "contar_categoria", "typo"),
     # fora do domínio
     ("qual a capital da Franca", None, "fora"),
     ("previsao do tempo para amanha", None, "fora"),

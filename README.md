@@ -61,6 +61,21 @@ Para encerrar o site, pressione **Ctrl+C** na janela do terminal.
 > Se o SmartScreen bloquear, clique em **“Mais informações” → “Executar assim
 > mesmo”**.
 
+### Se o `iniciar.exe` abrir e fechar sem fazer nada
+
+Use o `iniciar.ps1`, que faz exatamente o mesmo, pelo PowerShell:
+
+```powershell
+cd C:\caminho\para\o\projeto
+powershell -ExecutionPolicy Bypass -File .\iniciar.ps1
+```
+
+O script embutido no `.exe` para ao receber qualquer aviso do Docker no
+stderr (por exemplo `WARNING: daemon is not using the default seccomp
+profile`), e a janela fecha antes de mostrar o erro. O `iniciar.ps1` já vem
+corrigido e, se algo der errado, deixa a mensagem na tela até você apertar
+Enter.
+
 ---
 
 ## O que o iniciador faz

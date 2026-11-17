@@ -4,7 +4,8 @@ Etapas (nesta ordem):
   1. normalização        -> minúsculas, sem acento, sem pontuação
   2. correção ortográfica -> léxico fechado do domínio (rapidfuzz)
   3. canonização          -> sinônimos viram a forma canônica (mata -> vegetacao)
-  4. números              -> 2024 vira "ano"; dd/mm/aaaa vira "data"
+  4. números              -> 2024 vira "ano"; dd/mm/aaaa vira "data";
+                             "marco" ou 03/2024 viram "mes"
   5. tokenização
   6. remoção de stopwords (preservando palavras de intenção)
   7. stemming RSLP        -> imagens vira "imag"
@@ -22,7 +23,7 @@ import nltk  # noqa: E402
 from nltk.stem import RSLPStemmer  # noqa: E402
 
 from corretor import corrigir_texto  # noqa: E402
-from entidades import canonizar  # noqa: E402
+from entidades import REGEX_MES_ANO, REGEX_NOME_MES, canonizar  # noqa: E402
 from lexico import SINONIMOS_INTENCAO  # noqa: E402
 from texto import normalizar  # noqa: E402
 
@@ -47,7 +48,7 @@ MANTER = {
     "mais", "categoria", "origem", "origens", "fonte", "fontes",
     "sensor", "sensores", "capturada", "capturadas", "tirada", "tiradas",
     "feita", "feitas", "obtida", "obtidas", "sistema", "banco", "possui",
-    "dia", "ano", "data",
+    "dia", "ano", "data", "mes",
 }
 
 STOP = STOP_BASE - MANTER
@@ -74,6 +75,8 @@ def canonizar_intencao(texto: str) -> str:
 
 def substituir_numeros(texto: str) -> str:
     texto = _RE_DATA.sub(" data ", texto)
+    texto = REGEX_MES_ANO.sub(" mes ano ", texto)   # 03/2024
+    texto = REGEX_NOME_MES.sub(" mes ", texto)       # marco, julho...
     texto = _RE_ANO.sub(" ano ", texto)
     return re.sub(r"\s+", " ", texto).strip()
 
